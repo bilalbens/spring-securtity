@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.sid.secservice.sec.JWTUtil.*;
+
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private AuthenticationManager authenticationManager;
@@ -56,17 +58,17 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         //************generate the JWT*************
                 //to calculate the signature of jwt we use RSA or HMAC
-        Algorithm algorithm = Algorithm.HMAC256("MySecret123456");
+        Algorithm algorithm = Algorithm.HMAC256(SECRET);
         String jwtAccessToken = JWT.create()
                         .withSubject(user.getUsername())
-                        .withExpiresAt(new Date(System.currentTimeMillis() + 5*60*1000))
+                        .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRE_ACCESS_TOKEN))
                         .withIssuer(request.getRequestURL().toString())
                         .withClaim("roles", user.getAuthorities().stream().map(ge->ge.getAuthority()).collect(Collectors.toList()))
                         .sign(algorithm);
 
         String jwtRefreshToken = JWT.create()
                 .withSubject(user.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 20*60*1000))
+                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRE_REFRESH_TOKEN))
                 .withIssuer(request.getRequestURL().toString())
                 .sign(algorithm);
 
